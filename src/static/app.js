@@ -9,9 +9,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch("/activities");
       const activities = await response.json();
-
       // Clear loading message
       activitiesList.innerHTML = "";
+
+      // Reset activity select to avoid duplicate options on re-fetch
+      activitySelect.innerHTML = '<option value="">-- Select an activity --</option>';
 
       // Populate activities list
       Object.entries(activities).forEach(([name, details]) => {
@@ -26,6 +28,35 @@ document.addEventListener("DOMContentLoaded", () => {
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
         `;
+
+        // Participants section (built with DOM methods for safety)
+        const participantsSection = document.createElement('div');
+        participantsSection.className = 'participants-section';
+
+        const participantsHeader = document.createElement('p');
+        participantsHeader.className = 'participants-header';
+        participantsHeader.innerHTML = `<strong>Participants (${details.participants.length}):</strong>`;
+        participantsSection.appendChild(participantsHeader);
+
+        const participantsList = document.createElement('ul');
+        participantsList.className = 'participants-list';
+
+        if (!details.participants || details.participants.length === 0) {
+          const li = document.createElement('li');
+          li.className = 'participant-item empty';
+          li.textContent = 'No participants yet';
+          participantsList.appendChild(li);
+        } else {
+          details.participants.forEach((p) => {
+            const li = document.createElement('li');
+            li.className = 'participant-item';
+            li.textContent = p;
+            participantsList.appendChild(li);
+          });
+        }
+
+        participantsSection.appendChild(participantsList);
+        activityCard.appendChild(participantsSection);
 
         activitiesList.appendChild(activityCard);
 
